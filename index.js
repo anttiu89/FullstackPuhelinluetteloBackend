@@ -32,16 +32,16 @@ let phonebook = [
     }
   ]
 
-app.get('/info', (req, res) => {
+app.get('/info', (request, response) => {
     const personCount = phonebook.length
     const phonebookInfoParagraph = `<p>Phonebook has info for ${personCount} people</p>`
     const date = Date()
     const dateStringParagraph = `<p>${date.toString()}</p>`
-    res.send(phonebookInfoParagraph + dateStringParagraph)
+    response.send(phonebookInfoParagraph + dateStringParagraph)
 })
 
-app.get('/api/persons', (req, res) => {
-    res.json(phonebook)
+app.get('/api/persons', (request, response) => {
+    response.json(phonebook)
 })
 
 app.get('/api/persons/:id', (request, response) => {
@@ -67,6 +67,27 @@ app.delete('/api/persons/:id', (request, response) => {
 
 app.post('/api/persons', (request, response) => {
     const body = request.body
+
+    if (!body.name) {
+        return response.status(400).json({ 
+            error: "name is missing"
+        })
+    }
+    if (!body.number) {
+        return response.status(400).json({ 
+            error: "number is missing"
+        })
+    }
+
+    const personFound = phonebook.find(person => {
+        return person.name === body.name
+    })
+
+    if (personFound) {
+        return response.status(400).json({ 
+            error: "name must be unique"
+        })
+    }
 
     const person = {
         id: getRandomInt(1000000, 2000000),
