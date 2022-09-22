@@ -3,6 +3,12 @@ const app = express()
 
 app.use(express.json())
 
+const getRandomInt = (min, max) => {
+    min = Math.ceil(min)
+    max = Math.floor(max)
+    return Math.floor(Math.random() * (max - min) + min)
+}
+
 let phonebook = [
     {
         id: 1,
@@ -57,6 +63,20 @@ app.delete('/api/persons/:id', (request, response) => {
         return person.id !== id
     })
     response.status(204).end()
+})
+
+app.post('/api/persons', (request, response) => {
+    const body = request.body
+
+    const person = {
+        id: getRandomInt(1000000, 2000000),
+        name: body.name,
+        number: body.number
+    }
+
+    phonebook = phonebook.concat(person)
+
+    response.json(person)
 })
 
 const PORT = 3001
