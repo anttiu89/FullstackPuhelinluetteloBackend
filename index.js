@@ -26,6 +26,14 @@ let phonebook = [
     }
   ]
 
+app.get('/info', (req, res) => {
+    const personCount = phonebook.length
+    const phonebookInfoParagraph = `<p>Phonebook has info for ${personCount} people</p>`
+    const date = Date()
+    const dateStringParagraph = `<p>${date.toString()}</p>`
+    res.send(phonebookInfoParagraph + dateStringParagraph)
+})
+
 app.get('/api/persons', (req, res) => {
     res.json(phonebook)
 })
