@@ -3,7 +3,13 @@ const app = express()
 const morgan = require("morgan")
 
 app.use(express.json())
-app.use(morgan("tiny"))
+
+morgan.token("myToken", (request, response) => { 
+    if (request.body) {
+        return JSON.stringify(request.body)
+    }
+})
+app.use(morgan(":method :url :status :res[content-length] - :response-time ms :myToken"))
 
 const getRandomInt = (min, max) => {
     min = Math.ceil(min)
