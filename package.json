@@ -1,0 +1,27 @@
+{
+  "name": "puhelinluettelo",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anttiu89/FullstackPuhelinluetteloBackend.git"
+  },
+  "author": "Antti Uusimäki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/anttiu89/FullstackPuhelinluetteloBackend/issues"
+  },
+  "homepage": "https://github.com/anttiu89/FullstackPuhelinluetteloBackend#readme",
+  "dependencies": {
+    "express": "^4.18.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
