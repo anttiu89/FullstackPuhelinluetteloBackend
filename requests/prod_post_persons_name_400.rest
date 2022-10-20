@@ -1,0 +1,6 @@
+POST https://anttiu-puhelinluettelo.herokuapp.com/api/persons
+Content-Type: application/json
+
+{
+    "number": "044-5026989"
+}
