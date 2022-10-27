@@ -22,41 +22,43 @@ const getRandomInt = (min, max) => {
     return Math.floor(Math.random() * (max - min) + min)
 }
 
-let phonebook = [
-    {
-        id: 1,
-        name: "Arto Hellas",
-        number: "040-123456"
-    },
-    {
-        id: 2,
-        name: "Ada Lovelace",
-        number: "39-44-5323523"
-    },
-    {
-        id: 3,
-        name: "Dan Abramov",
-        number: "12-43-234345"
-    },
-    {
-        id: 4,
-        name: "Mary Poppendick",
-        number: "39-23-6423122"
-    }
-  ]
+const convertDbPersonList = (dbPersonList) => {
+    let retPersons = dbPersonList.map((dbPerson) => {
+        return convertDbPerson(dbPerson)
+    })
+    return retPersons
+}
 
-app.get('/info', (request, response) => {
-    const personCount = phonebook.length
-    const phonebookInfoParagraph = `<p>Phonebook has info for ${personCount} people</p>`
-    const date = Date()
-    const dateStringParagraph = `<p>${date.toString()}</p>`
-    response.send(phonebookInfoParagraph + dateStringParagraph)
+const convertDbPerson = (dbPerson) => {
+    const retPerson = {
+        id: dbPerson._id.toString(),
+        name: dbPerson.name,
+        number: dbPerson.number
+    }
+    return retPerson
+}
+
+app.get('/info', (request, response, next) => {
+    Person.find({})
+    .then(persons => {
+        const personList = convertDbPersonList(persons)
+        console.log(personList)
+        const personCount = personList.length
+        console.log(personCount)
+        const personsInfoParagraph = `<p>Phonebook has info for ${personCount} people</p>`
+        const date = Date()
+        const dateStringParagraph = `<p>${date.toString()}</p>`
+        response.send(personsInfoParagraph + dateStringParagraph)
+    })
+    .catch(error => next(error))
 })
 
-app.get('/api/persons', (request, response) => {
-    Person.find({}).then(persons => {
+app.get('/api/persons', (request, response, next) => {
+    Person.find({})
+    .then(persons => {
         response.json(persons)
     })
+    .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -80,7 +82,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
     if (!body.name) {
@@ -93,25 +95,35 @@ app.post('/api/persons', (request, response) => {
             error: "number is missing"
         })
     }
+    
+    Person.find({})
+    .then(persons => {
+        const personList = convertDbPersonList(persons)
+        console.log(personList)
 
-    // const personFound = phonebook.find(person => {
-    //     return person.name === body.name
-    // })
+        const personFound = personList.find(person => {
+            return person.name === body.name
+        })
+        console.log(personFound)
+    
+        if (personFound) {
+            return response.status(400).json({ 
+                error: "name must be unique"
+            })
+        }
 
-    // if (personFound) {
-    //     return response.status(400).json({ 
-    //         error: "name must be unique"
-    //     })
-    // }
-
-    const person = new Person({
-        name: body.name,
-        number: body.number,
+        const person = new Person({
+            name: body.name,
+            number: body.number,
+        })
+    
+        person.save()
+        .then(savedPerson => {
+            response.json(savedPerson)
+        })
+        .catch(error => next(error))
     })
-
-    person.save().then(savedPerson => {
-        response.json(savedPerson)
-    })
+    .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
@@ -129,6 +141,13 @@ app.put('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+  
+// olemattomien osoitteiden käsittely
+app.use(unknownEndpoint)
+
 const errorHandler = (error, request, response, next) => {
     console.error(error.message)
 
@@ -138,13 +157,6 @@ const errorHandler = (error, request, response, next) => {
 
     next(error)
 }
-  
-const unknownEndpoint = (request, response) => {
-    response.status(404).send({ error: 'unknown endpoint' })
-}
-  
-// olemattomien osoitteiden käsittely
-app.use(unknownEndpoint)
 
 // tämä tulee kaikkien muiden middlewarejen rekisteröinnin jälkeen!
 app.use(errorHandler)
